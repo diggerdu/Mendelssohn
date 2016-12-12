@@ -30,8 +30,8 @@ if __name__ == '__main__':
     
     LEN = rawData.shape[0]
     spec = stft(rawData)
-	
-    reCon = istft(spec)
+    
+    reCon = istft(np.abs(spec).astype(np.complex64))
     print type(rawData[0])
     print type(rawData[0])
     print type(reCon[0])
