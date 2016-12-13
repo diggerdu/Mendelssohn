@@ -11,7 +11,7 @@ from utils import *
 
 class DCGAN(object):
     def __init__(self, sess, image_size=512, is_crop=False,
-                 batch_size=32, sample_size = 32, output_size=512,
+                 batch_size=128, sample_size = 32, output_size=512,
                  y_dim=None, z_dim=100, gf_dim=64, df_dim=64,
                  gfc_dim=1024, dfc_dim=1024, c_dim=2, dataset_name='default',
                  checkpoint_dir=None, sample_dir=None):
@@ -109,8 +109,6 @@ class DCGAN(object):
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
         
-        for var in self.g_vars:
-            print var.get_shape()
 
         self.saver = tf.train.Saver()
 
@@ -140,18 +138,6 @@ class DCGAN(object):
         '''
         sample_z = np.random.uniform(-1, 1, size=(self.sample_size , self.z_dim))
         
-        '''
-        if config.dataset == 'mnist':
-            sample_images = data_X[0:self.sample_size]
-            sample_labels = data_y[0:self.sample_size]
-        else:
-            sample_files = data[0:self.sample_size]
-            sample = [get_image(sample_file, self.image_size, is_crop=self.is_crop, resize_w=self.output_size, is_grayscale = self.is_grayscale) for sample_file in sample_files]
-            if (self.is_grayscale):
-                sample_images = np.array(sample).astype(np.float32)[:, :, :, None]
-            else:
-                sample_images = np.array(sample).astype(np.float32)
-        '''
         
         
         counter = 1
@@ -163,9 +149,9 @@ class DCGAN(object):
         else:
             print(" [!] Load failed...")
         '''
-        
+       
+        data = self.load_data()
         for epoch in xrange(config.epoch):
-            data = self.load_data()
             batch_idxs = min(len(data), config.train_size) // config.batch_size
 
             for idx in xrange(0, batch_idxs):
@@ -174,19 +160,27 @@ class DCGAN(object):
                 batch_z = np.random.uniform(-1, 1, [config.batch_size, self.z_dim]) \
                             .astype(np.float32)
 
-
-                # Update D network
-                k = 1
-                for i in range(k):
+                
+                if 'errG' in locals():
+                    if errD_fake + errD_real > errG:
+                        D_step, G_step = (1, 3)
+                    else:
+                        D_step, G_step = (2, 1)
+                else:
+                    D_step, G_step = (1, 1)
+                #updatae D network
+                for i in range(D_step):
                     _= self.sess.run(d_optim,
-                        feed_dict={ self.images: batch_images, self.z: batch_z })
+                    feed_dict={ self.images: batch_images, self.z: batch_z })
                 
                 
                 #self.writer.add_summary(summary_str, counter)
 
+                
                 # Update G network
-                _ = self.sess.run(g_optim,
-                    feed_dict={ self.z: batch_z })
+                for i in range(G_step):
+                    _ = self.sess.run(g_optim,
+                        feed_dict={ self.z: batch_z })
                 #self.writer.add_summary(summary_str, counter)
 
 
@@ -200,7 +194,7 @@ class DCGAN(object):
                     % (epoch, idx, batch_idxs,
                         time.time() - start_time, errD_fake+errD_real, errG))
 
-                if np.mod(counter, 16) == 1:
+                if np.mod(counter, 256) == 1:
                     samples = self.sess.run(self.sampler, feed_dict={self.z: sample_z})
                     np.save( './samples/train_{:02d}_{:04d}.npy'.format(epoch, idx), samples)
                     
@@ -286,9 +280,10 @@ class DCGAN(object):
     def load_data(self):
         data_dir = "../feature_extraction"
         loaded = np.load(os.path.join(data_dir, "mo1_16k.npy"))
-        step = 400
-        width = 512
+        step = 1024
+        width = 128
         X =  np.concatenate([np.expand_dims(loaded[i:i+width,:width,:], axis=0) for i in range(0, loaded.shape[0]- width , step)])
+        print "test", X.shape
         return X  
     
     def save(self, checkpoint_dir, step):

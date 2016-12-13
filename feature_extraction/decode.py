@@ -5,15 +5,15 @@ import shutil, os
 
 
 
-def spec2wav(logSpec):
-    Spec = np.multiply(np.sign(logSpec), np.power(10, np.multiply(np.abs(logSpec), 6)+1) - 10)
+def spec2wav(Spec):
+    Spec = 36.00 * Spec
     Spec = Spec[...,0] + 1j*Spec[...,1]
-    return istft(Spec)
+    return istft(Spec, scale = 30000.000)
 
 
 
 if __name__ == '__main__':
-    data = np.load("train_669_0014.npy")
+    data = np.load("train_611_0016.npy")
     print data.shape
     shutil.rmtree("Suites_for_Cello", ignore_errors=True)
     os.mkdir("Suites_for_Cello")
@@ -22,5 +22,8 @@ if __name__ == '__main__':
 
 '''
 data = np.load("mo1_16k.npy")
-wave.write("test.wav", 16000, spec2wav(data[1213:1213+512,:512]))
+rawData = spec2wav(data[1213:1213+12313, :128])
+np.save("rawData.npy", rawData)
+wave.write("test.wav", 16000, rawData)
+
 '''

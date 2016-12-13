@@ -2,12 +2,12 @@ import scipy, pylab
 import numpy as np
 import scipy.io.wavfile as wave
 
-def stft(x, fftsize=1024, overlap=2):   
+def stft(x, fftsize=1024, overlap=4):   
     hop = fftsize / overlap
     w = scipy.hanning(fftsize+1)[:-1]      # better reconstruction with this trick +1)[:-1]  
     return np.array([np.fft.rfft(w*x[i:i+fftsize]) for i in range(0, len(x)-fftsize, hop)])
 
-def istft(X, overlap=2):   
+def istft(X, scale = 1, overlap=4):   
     fftsize=(X.shape[1]-1)*2
     hop = fftsize / overlap
     w = scipy.hanning(fftsize+1)[:-1]
@@ -18,6 +18,7 @@ def istft(X, overlap=2):
         wsum[i:i+fftsize] += w ** 2.
     pos = wsum != 0
     x[pos] /= wsum[pos]
+    x = x * scale
     return x.astype(np.int16)
 
 if __name__ == '__main__':
@@ -29,9 +30,10 @@ if __name__ == '__main__':
     (rate, rawData) = wave.read(FILE)
     
     LEN = rawData.shape[0]
-    spec = stft(rawData)
+    spec = stft(rawData, fftsize=256)
     
-    reCon = istft(np.abs(spec).astype(np.complex64))
+
+    reCon = istft(spec)
     print type(rawData[0])
     print type(rawData[0])
     print type(reCon[0])
