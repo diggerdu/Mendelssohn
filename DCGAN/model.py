@@ -162,7 +162,7 @@ class DCGAN(object):
 
                 
                 if 'errG' in locals():
-                    if errD_fake + errD_real > errG:
+                    if errD_fake + errD_real < errG / 2:
                         D_step, G_step = (1, 3)
                     else:
                         D_step, G_step = (2, 1)

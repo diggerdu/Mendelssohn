@@ -13,7 +13,7 @@ def spec2wav(Spec):
 
 
 if __name__ == '__main__':
-    data = np.load("train_611_0016.npy")
+    data = np.load("train_2943_0007.npy")
     print data.shape
     shutil.rmtree("Suites_for_Cello", ignore_errors=True)
     os.mkdir("Suites_for_Cello")
