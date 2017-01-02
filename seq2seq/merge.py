@@ -12,8 +12,8 @@ batch_size = 256
 train_iters = np.inf
 save_step = 30000
 ## load data
-input_data = np.load("../feature_extraction/mo1_16k.npy")[::, 0:n_input]
-target_data= np.load("../feature_extraction/mo1_16k.npy")[::, n_input:]
+input_data = np.load("../feature_extraction/mo1_16k.npy")[::, 0:n_input, 0]
+target_data= np.load("../feature_extraction/mo1_16k.npy")[::, n_input:, 0]
 
 with tf.device('/gpu:0'):
     x = tf.placeholder("float", [None, n_input])
@@ -33,7 +33,7 @@ with tf.device('/gpu:0'):
     w_output = tf.Variable(tf.truncated_normal([n_hidden, n_output], stddev=0.1))
     b_output = tf.Variable(tf.constant(0., shape=[n_output]))
     op_list.append(tf.matmul(op_list[-1], w_output) + b_output)
-    loss = tf.reduce_mean(tf.multiply(y, tf.log(tf.div(y, op_list[-1]))))
+    loss = tf.reduce_mean(tf.nn.l2_loss(tf.sub(op_list[-1], y)))
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
 
 init = tf.initialize_all_variables()
