@@ -1,5 +1,5 @@
 import scipy.io.wavfile as wave
 import numpy as np
 
-rate, rawData = wave.read("mo1_8k.wav")
-wave.write("clip_8k.wav", 8000, rawData[1000:22100*60])
+rate, rawData = wave.read("mo1_16k.wav")
+wave.write("spring_16k.wav", 16000, rawData[1000:16000*60])
