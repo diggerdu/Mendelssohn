@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 ## hyper parameter
 n_step = 12  # bidirectional
@@ -9,28 +10,28 @@ n_output = 256
 n_hidden = 256
 n_h_layer = 4
 learning_rate = 0.00002
-batch_size = 768
+batch_size = 1024
 train_iters = np.inf
 save_step = 30000
 ## load data
 input_data = np.log1p(np.load("./data/train.npy").T[:5000, 0:n_input]) / 12.0
 target_data= np.log1p(np.load("./data/train.npy").T[:5000, n_input:]) / 8.0
 
-with tf.device('/gpu:1'):
-    x = tf.placeholder("float", [None, n_step, n_input])
-    rnn_input = tf.transpose(x, [1, 0, 2])
-    rnn_input = tf.unstack(rnn_input, axis=0)
-    y = tf.placeholder("float", [None, n_output])
-    
-    rnn_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
-    fw_cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell] * n_h_layer, state_is_tuple=True)
-    #bw_cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell] * n_h_layer, state_is_tuple=True)
-    outputs,_ = tf.nn.rnn(fw_cell, rnn_input, dtype=tf.float32)
-    w_output = tf.Variable(tf.truncated_normal([n_hidden, n_output], stddev=0.1))
-    b_output = tf.Variable(tf.constant(0., shape=[n_output]))
-    logits = tf.sigmoid(tf.matmul(outputs[-1], w_output) + b_output)
-    loss = tf.reduce_mean(tf.multiply(y, tf.abs(tf.subtract(y, logits))))
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
+
+x = tf.placeholder("float", [None, n_step, n_input])
+rnn_input = tf.transpose(x, [1, 0, 2])
+rnn_input = tf.unstack(rnn_input, axis=0)
+y = tf.placeholder("float", [None, n_output])
+
+rnn_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
+fw_cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell] * n_h_layer, state_is_tuple=True)
+#bw_cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell] * n_h_layer, state_is_tuple=True)
+outputs,_ = tf.nn.rnn(fw_cell, rnn_input, dtype=tf.float32)
+w_output = tf.Variable(tf.truncated_normal([n_hidden, n_output], stddev=0.1))
+b_output = tf.Variable(tf.constant(0., shape=[n_output]))
+logits = tf.sigmoid(tf.matmul(outputs[-1], w_output) + b_output)
+loss = tf.reduce_mean(tf.multiply(y, tf.abs(tf.subtract(y, logits))))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
 
 init = tf.initialize_all_variables()
 saver = tf.train.Saver()
@@ -46,5 +47,5 @@ while step * batch_size < train_iters:
 
     print ('at epoch {}, loss is {}'.format(step, loss_))
     if step % save_step == 0:
-        saver.save(sess, "./checkpoint/mlp_model_0")
+        saver.save(sess, "./checkpoint/mlp_model_1")
     step += 1 

@@ -4,7 +4,7 @@ import scipy.io.wavfile as wave
 
 def stft(x, fftsize=1024, overlap=4):   
     hop = fftsize / overlap
-    w = scipy.hanning(fftsize+1)[:-1]      # better reconstruction with this trick +1)[:-1]  
+    w = scipy.hanning(fftsize)  
     return np.array([np.fft.rfft(w*x[i:i+fftsize]) for i in range(0, len(x)-fftsize, hop)])
 
 def istft(X, scale = 1, overlap=4):   
