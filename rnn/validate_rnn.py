@@ -14,8 +14,8 @@ batch_size = 1024
 train_iters = np.inf
 save_step = 30000
 ## load data
-input_data = np.log1p(np.load("./data/train.npy").T[:5000, 0:n_input]) / 12.0
-target_data= np.log1p(np.load("./data/train.npy").T[:5000, n_input:]) / 8.0
+input_data = np.log1p(np.load("./data/eva.npy").T[::, 0:n_input]) / 12.0
+target_data= np.log1p(np.load("./data/train.npy").T[::, n_input:]) / 8.0
 
 # with tf.device('/gpu:0'):
 x = tf.placeholder("float", [None, n_step, n_input])
@@ -40,7 +40,7 @@ sess.run(init)
 
 saver.restore(sess, './checkpoint/mlp_model_0')
 
-low_band = input_data[:int(256*16000/1024),:n_input]                                            
+low_band = input_data[::,:n_input]                                            
 print low_band.shape
 low_band_input = np.asarray([low_band[i-n_step:i] for i in range(n_step, low_band.shape[0]+1)])
 print low_band_input.shape

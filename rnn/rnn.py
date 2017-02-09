@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 ## hyper parameter
 n_step = 12  # bidirectional
@@ -37,6 +37,7 @@ init = tf.initialize_all_variables()
 saver = tf.train.Saver()
 sess = tf.Session()
 sess.run(init)
+saver.restore(sess, "./checkpoint/mlp_model_0")
 step = 1
 while step * batch_size < train_iters: 
     idx = np.random.choice(input_data.shape[0] - n_step*2, batch_size) + n_step

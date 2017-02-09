@@ -7,7 +7,9 @@ N_FFT = 1024
 AUDIO_PATH = '../Suites-for-solo-cello/mo1_16k.wav'
 OUTPUT_PATH  = './data/train.npy'
 fs, X = wave.read(AUDIO_PATH) 
+print fs
 print np.max(X)
+print X.shape
 S = np.abs(librosa.stft(X, N_FFT))
 print np.max(S)
 
