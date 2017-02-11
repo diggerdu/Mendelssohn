@@ -25,11 +25,13 @@ class Deco_Model(HQModel):
                     k_size=[4,4], name='dc_6'))
             dc_7 = tf.nn.relu(deconv2d(dc_6, o_size=[None,128,16,32],\
                     k_size=[2,2], name='dc_7'))
-            dc_8 = tf.nn.relu(deconv2d(dc_7,\
-                    o_size=[None,self.o_size[-2],self.o_size[-1],1]))
+            G_output = tf.nn.relu(deconv2d(dc_7,\
+                    o_size=self.o_size, \
+                    k_size=[2,2], name='G_output'))
 
-            G_output = tf.squeeze(dc_8, name='G_output')
             assert ten_sh(G_output) == ten_sh(self.target)
+            test = tf.concat(1, (self.input, G_output))
+            print ten_sh(test)
             return G_output
             
    
@@ -44,8 +46,10 @@ save_step = 30000
 ## load data
 input_data = np.log1p(np.load("./data/train.npy")[0:n_input, ::]) / 12.0
 target_data= np.log1p(np.load("./data/train.npy")[n_input:, ::]) / 8.0
+input_data = np.expand_dims(input_data, axis=-1)
+target_data = np.expand_dims(target_data, axis=-1)
 
-M = Deco_Model(in_size=[None, n_input, n_len, 1], ou_size=[None, n_output, n_len], lr=learning_rate)
+M = Deco_Model(in_size=[None, n_input, n_len, 1], ou_size=[None, n_output, n_len, 1], lr=learning_rate)
 
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
@@ -54,13 +58,12 @@ sess.run(init)
 step = 1
 while step * batch_size < train_iters: 
     idx = np.random.choice(input_data.shape[0] - n_len  , batch_size)
-    batch_input = np.expand_dims(np.asarray([input_data[::,i:i+n_len] for i in idx.tolist()]),\
-            axis = -1)
+    batch_input = np.asarray([input_data[::,i:i+n_len] for i in idx.tolist()])
     batch_target = np.asarray([target_data[::,i:i+n_len] for i in idx.tolist()])
-    print batch_input.shape
-    print batch_target.shape
+    #print batch_input.shape
+    #print batch_target.shape
     assert batch_input.shape == tuple([batch_size, n_input, n_len, 1])
-    assert batch_target.shape == tuple([batch_size, n_output, n_len])
+    assert batch_target.shape == tuple([batch_size, n_output, n_len, 1])
     loss_, _ = sess.run([M.loss, M.opt], feed_dict={M.input:batch_input, \
             M.target:batch_target})
 
