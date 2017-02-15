@@ -6,7 +6,7 @@ from ops import *
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 class Deco_Model(HQModel):
-     def _generator(self, input_, name):
+    def _generator(self, input_, name):
         with tf.variable_scope(name):
             tar_s = ten_sh(input_)
             co_0 = tf.nn.relu(conv2d(self.input, o_dim=64, \
@@ -35,7 +35,7 @@ class Deco_Model(HQModel):
             return G_output
             
    
-## hyper parameter
+# hyper parameter
 n_input = 257
 n_output = 256
 n_len = 32
@@ -68,6 +68,6 @@ while step * batch_size < train_iters:
             M.target:batch_target})
 
     print ('at epoch {}, loss is {}'.format(step, loss_))
-    if step % save_step == 0:
-        saver.save(sess, "./checkpoint/deconv_model_0")
+    if step % save_step == 0 or loss < 1e-8:
+        saver.save(sess, "./checkpoint/deconv_model")
     step += 1 

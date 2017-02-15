@@ -17,6 +17,8 @@ class HQModel(object):
         self.build()
     def build(self):
         self.output = self._generator(self.input, name='model_output')
+        self.eva_op = tf.concat(1, \
+                (tf.exp(self.input*12.0)-1, tf.exp(self.output*8.0)-1), name='eva_op')
         assert ten_sh(self.output) == ten_sh(self.target)
         self.loss = self._get_loss('model_loss') 
         self.opt = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss) 

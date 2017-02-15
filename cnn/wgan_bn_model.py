@@ -5,7 +5,7 @@
 
 import numpy as np
 import tensorflow as tf
-from ops import *
+from bn_ops import *
 import tensorflow.contrib.layers as ly
 
 class WGAN(object):
@@ -24,10 +24,8 @@ class WGAN(object):
         self.content_loss = tf.reduce_mean(tf.multiply(tf.log1p(self.output),\
                 tf.abs(tf.subtract(self.target, self.output))))
         assert ten_sh(self.output) == ten_sh(self.target)
-        self.eva_op = tf.concat(1, \
-            (tf.exp(self.input*12.0)-1, tf.exp(self.output*8.0)-1), name='eva_op')
-        self.concat_output  = tf.exp(tf.concat(1, (self.input, self.output)))
-        self.concat_target  = tf.exp(tf.concat(1, (self.input, self.target)))
+        self.concat_output  = tf.concat(1, (self.input, self.output))
+        self.concat_target  = tf.concat(1, (self.input, self.target))
         self.fake_em = self._critic(self.concat_output, name='critic')
         self.true_em = self._critic(self.concat_target, name='critic', reuse=True)
         self.c_loss = tf.reduce_mean(self.fake_em - self.true_em, name='c_loss')
@@ -53,11 +51,11 @@ class WGAN(object):
                 optimizer=tf.train.RMSPropOptimizer,\
                 variables=theta_c,\
                 global_step=counter_c)
-        self.g_opt = ly.optimize_loss(self.g_loss, learning_rate=self.g_lr,\
+        self.g_opt = ly.optimize_loss(loss=self.g_loss, learning_rate=self.g_lr,\
                 optimizer=tf.train.RMSPropOptimizer,\
                 variables=theta_g,\
                 global_step=counter_g)
-        self.content_opt = ly.optimize_loss(self.content_loss, learning_rate=self.g_lr,\
+        self.content_opt = ly.optimize_loss(loss=self.content_loss, learning_rate=self.g_lr,\
                 optimizer=tf.train.RMSPropOptimizer,\
                 variables=theta_g,\
                 global_step=counter_g)

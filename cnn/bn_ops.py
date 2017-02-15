@@ -7,7 +7,6 @@ def ten_sh(tensor):
     return tensor.get_shape().as_list()
 
 def conv2d(input_, o_dim, k_size, st, name='conv2d'):
-    '''
     with tf.variable_scope(name):
         init = ly.xavier_initializer_conv2d()
         output = ly.conv2d(input_, num_outputs=o_dim, kernel_size=k_size, stride=st,\
@@ -24,6 +23,7 @@ def conv2d(input_, o_dim, k_size, st, name='conv2d'):
         bia = tf.get_variable('co_b', [o_dim])
         co = tf.nn.bias_add(co, bia)
         return co
+    '''
     
 
 def deconv2d(input_, o_size, k_size, name='deconv2d'):
@@ -34,7 +34,8 @@ def deconv2d(input_, o_size, k_size, name='deconv2d'):
         init = ly.xavier_initializer_conv2d()
         output = ly.convolution2d_transpose(input_, num_outputs=o_size[-1], \
                 kernel_size=k_size, stride=np.divide(o_size[1:3], ten_sh(input_)[1:3]), \
-                padding='SAME', weights_initializer=init)
+                padding='SAME', weights_initializer=init, \
+                activation_fn=tf.nn.relu, normalizer_fn=ly.batch_norm)
         return output
 '''
     with tf.variable_scope(name):
