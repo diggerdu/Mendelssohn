@@ -1,5 +1,5 @@
 # Paper
-## Griffin-Lim method
+#### Griffin-Lim method
 Signal estimation from modified short-time Fourier transform
 An Incremental Algorithm for Signal Reconstruction from Short-Time Fourier Transform Magnitude
 # Code
