@@ -57,6 +57,6 @@ for i in range(500):
     print np.max(X)                                                                             
     p = np.angle(librosa.stft(X, 1024))                                                         
                                                                                                 
-OUTPUT_PATH = './data/spring_16k_recon.wav'                                                     
+    OUTPUT_PATH = './data/spring_16k_recon.wav'                                                     
 np.save('fallback.npy',X)                                                                       
 wave.write(OUTPUT_PATH, 16000, X.T.astype(np.int16))    

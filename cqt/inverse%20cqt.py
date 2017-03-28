@@ -13,10 +13,9 @@
 
 # In[1]:
 
-import librosa as _librosa
+import librosa
 import librosa.display as _display
 _librosa.display = _display
-from presets import Preset
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -33,7 +32,6 @@ from IPython.display import Audio
 
 # In[570]:
 
-librosa = Preset(_librosa)
 librosa['sr'] = 44100
 librosa['hop_length'] = 128
 librosa['scale'] = True

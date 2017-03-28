@@ -48,3 +48,15 @@ def deconv2d(input_, o_size, k_size, name='deconv2d'):
         return dc
 '''
 
+
+def reconv2d(input_, o_size, k_size, name='reconv2d'):
+    print name, 'input', ten_sh(input_)
+    print name, 'output', o_size
+    input_ = tf.image.resize_nearest_neighbor(input_, o_size[:3])
+    with tf.variable_scope(name):
+        init = ly.xavier_initializer_conv2d()
+        output = ly.conv2d(input_, num_outputs=o_size[-1], kernel_size=k_size, stride=1,\
+                activation_fn=tf.nn.relu, normalizer_fn=ly.batch_norm, padding='SAME',\
+                weights_initializer=init)
+        return output
+

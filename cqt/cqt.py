@@ -1,6 +1,6 @@
 import numpy as np
 import librosa
-def icqt_recursive(C, sr=22050, hop_length=512, fmin=None, bins_per_octave=12, filter_scale=None, norm=1, scale=True, window='hann'):
+def icqt_recursive(C, sr=22050, hop_length=512, fmin=None, bins_per_octave=12, filter_scale=1, norm=1, scale=True, window='hann'):
     
     n_octaves = int(np.ceil(float(C.shape[0]) / bins_per_octave))
 
@@ -69,3 +69,27 @@ def icqt_recursive(C, sr=22050, hop_length=512, fmin=None, bins_per_octave=12, f
 
 icqt = icqt_recursive
 cqt = librosa.core.cqt
+
+def rcqt(PS, iters=500, sr=22050, hop_length=512, n_bins=84, bins_per_octave=12):
+    sig_len = (PS.shape[1]-1)*hop_length
+    p = 2 * np.pi * np.random.random_sample(PS.shape) - np.pi
+    for i in range(iters):
+        print i
+        S = PS * np.exp(1j*p)
+        X = icqt(S, sr=sr, hop_length=hop_length,
+                 bins_per_octave=bins_per_octave)
+        X = librosa.util.fix_length(X, sig_len)
+        p = np.angle(cqt(X, sr=sr, hop_length=hop_length, n_bins=n_bins,
+                     bins_per_octave=bins_per_octave))
+    return X
+
+if __name__ == '__main__':
+    (Y, sr) = librosa.load('quintessence.wav', sr=44100)
+    print Y.shape
+    S = librosa.cqt(Y, sr=44100, hop_length=256, n_bins=9*12*3, bins_per_octave=12*3)
+    print S.shape
+    PS = np.abs(S)
+    Y1 = rcqt(PS, iters=5000, sr=44100, hop_length=256, n_bins=9*12*3, bins_per_octave=12*3)
+    print Y1.shape
+    from IPython.display import Audio
+    librosa.output.write_wav('re.wav', Y1, sr=44100)

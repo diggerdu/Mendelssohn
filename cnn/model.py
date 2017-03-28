@@ -43,7 +43,20 @@ class HQModel(object):
             return G_output
     
     def _get_loss(self, name):
-        return tf.reduce_mean(tf.multiply(tf.log1p(self.output),\
-                tf.abs(tf.subtract(self.target, self.output))), name = name) 
+        return tf.reduce_mean(tf.multiply(self.target/tf.reduce_mean(self.target),
+                              tf.div(tf.log1p(self.target), tf.log1p(self.output))),
+                              name=name)
 
+        '''
+        return tf.reduce_mean(tf.multiply(tf.log1p(self.target/tf.reduce_mean(self.target)),
+                              tf.abs(tf.subtract(self.target, self.output))),
+                              name=name)
+
+        return tf.reduce_mean(tf.multiply(self.target/tf.reduce_mean(self.target),
+                              tf.abs(tf.subtract(self.target, self.output))),
+                              name=name)
+        return tf.reduce_mean(tf.multiply(1.0,
+                              tf.abs(tf.subtract(self.target, self.output))),
+                              name=name)
+        '''
 

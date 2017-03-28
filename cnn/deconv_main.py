@@ -3,7 +3,7 @@ import numpy as np
 import os
 from model import *
 from ops import *
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 class Deco_Model(HQModel):
     def _generator(self, input_, name):
@@ -42,32 +42,36 @@ n_len = 32
 learning_rate = 0.0001
 batch_size = 256
 train_iters = np.inf
-save_step = 30000
-## load data
+save_step = 2000
+# load data
 input_data = np.log1p(np.load("./data/train.npy")[0:n_input, ::]) / 12.0
-target_data= np.log1p(np.load("./data/train.npy")[n_input:, ::]) / 8.0
+target_data = np.log1p(np.load("./data/train.npy")[n_input:, ::]) / 8.0
 input_data = np.expand_dims(input_data, axis=-1)
 target_data = np.expand_dims(target_data, axis=-1)
 
-M = Deco_Model(in_size=[None, n_input, n_len, 1], ou_size=[None, n_output, n_len, 1], lr=learning_rate)
+M = Deco_Model(in_size=[None, n_input, n_len, 1],\
+        ou_size=[None, n_output, n_len, 1], lr=learning_rate)
 
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 sess = tf.Session()
 sess.run(init)
+saver.restore(sess, "./checkpoint/deconv_model")
 step = 1
-while step * batch_size < train_iters: 
-    idx = np.random.choice(input_data.shape[0] - n_len  , batch_size)
-    batch_input = np.asarray([input_data[::,i:i+n_len] for i in idx.tolist()])
-    batch_target = np.asarray([target_data[::,i:i+n_len] for i in idx.tolist()])
-    #print batch_input.shape
-    #print batch_target.shape
+while step * batch_size < train_iters:
+    idx = np.random.choice(input_data.shape[0] - n_len, batch_size)
+    batch_input = np.asarray([input_data[::, i:i+n_len] for i in idx.tolist()])
+    batch_target = np.asarray([target_data[::, i:i+n_len] for i in idx.tolist()])
     assert batch_input.shape == tuple([batch_size, n_input, n_len, 1])
     assert batch_target.shape == tuple([batch_size, n_output, n_len, 1])
     loss_, _ = sess.run([M.loss, M.opt], feed_dict={M.input:batch_input, \
             M.target:batch_target})
 
     print ('at epoch {}, loss is {}'.format(step, loss_))
-    if step % save_step == 0 or loss < 1e-8:
+    if step % save_step == 0 or loss_ < 1e-8:
+        exit
+        debug = sess.run(M.output, feed_dict={M.input:batch_input})
+        np.save('debug', debug)
+        np.save('target', batch_target)
         saver.save(sess, "./checkpoint/deconv_model")
     step += 1 
